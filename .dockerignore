@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+.env
+.env.*
+devpost/learner-profile.md
+npm-debug.log*

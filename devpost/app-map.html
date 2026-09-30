@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Basics Glassbox App Map</title>
+    <style>
+      :root {
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        color: #17211c;
+        background: #f4f1e8;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 18px;
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 4rem);
+        line-height: 1;
+      }
+      section {
+        margin: 16px 0;
+        border: 1px solid rgba(23, 33, 28, 0.14);
+        border-radius: 8px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.75);
+      }
+      code {
+        border-radius: 6px;
+        padding: 2px 5px;
+        background: #e7eadf;
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+      }
+      .flow div {
+        border-radius: 8px;
+        padding: 12px;
+        background: #fffdf7;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>AI Basics Glassbox App Map</h1>
+      <section>
+        <h2>Core Flow</h2>
+        <div class="flow">
+          <div>1. Edit source</div>
+          <div>2. Ask question</div>
+          <div>3. Chunk text</div>
+          <div>4. Rank evidence</div>
+          <div>5. Build prompt</div>
+          <div>6. Compare answers</div>
+          <div>7. Check risk</div>
+        </div>
+      </section>
+      <section>
+        <h2>Where Things Live</h2>
+        <p><code>src/lib/rag.ts</code> contains the transparent retrieval pipeline.</p>
+        <p><code>src/App.tsx</code> connects scenario controls to the visual panels.</p>
+        <p><code>src/data/scenarios.ts</code> stores the demo lessons.</p>
+        <p><code>src/styles/app.css</code> defines the full responsive interface.</p>
+      </section>
+      <section>
+        <h2>Reusable Practice</h2>
+        <p>
+          Start with the smallest end-to-end proof of the unique idea, then make every hidden
+          transformation visible enough to inspect and test.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
