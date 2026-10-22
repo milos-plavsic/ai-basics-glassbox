@@ -23,7 +23,7 @@ These limits are intentional and visible so that beginners can experiment safely
 
 ## Run locally
 
-Requirements: Node.js 22 (recommended) and npm.
+Requirements: Node.js 22 (recommended) and npm. The committed dependency tree uses legacy peer-dependency resolution; the checked-in `.npmrc` keeps local, CI, and Docker installs consistent.
 
 ```bash
 npm ci
@@ -41,7 +41,7 @@ npm test
 npm run build
 ```
 
-The GitHub Actions workflow runs the same checks on pushes and pull requests. Review dependency audit findings individually; a reported package issue should be evaluated for reachability and remediation rather than ignored or blindly forced through a potentially breaking upgrade.
+The GitHub Actions workflow runs the same checks on pushes and pull requests, including a required `npm audit --audit-level=moderate`, production build, Docker image build, and SPA fallback smoke test. Dependabot proposes weekly npm and GitHub Actions updates. Review dependency audit findings individually; do not ignore advisories or blindly force breaking upgrades.
 
 ## Run with Docker
 
