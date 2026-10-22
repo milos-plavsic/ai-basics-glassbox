@@ -30,11 +30,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin chore/release-readiness
           git add package.json package-lock.json
           if git diff --cached --quiet; then
             echo "No dependency changes to commit."
           else
             git commit -m "fix(deps): declare Testing Library DOM peer"
+            git pull --rebase origin chore/release-readiness
             git push origin HEAD:chore/release-readiness
           fi
