@@ -40,7 +40,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: /run/i }));
     expect(screen.getByRole('status')).toHaveTextContent(/results match the current inputs/i);
-    expect(screen.getByText('Only a short fact.')).toBeInTheDocument();
+    expect(screen.getAllByText('Only a short fact.').length).toBeGreaterThan(1);
   });
 
   it('resets the edited fields and reruns the selected scenario', async () => {
@@ -60,6 +60,6 @@ describe('App', () => {
     await user.selectOptions(screen.getByLabelText(/lesson scenario/i), 'garden');
     expect(screen.getByRole('status')).toHaveTextContent(/results match the current inputs/i);
     expect(screen.getByLabelText(/question/i)).toHaveValue('Can members bring guests to weekend workshops?');
-    expect(screen.getByText(/Weekend workshops/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Weekend workshops/).length).toBeGreaterThan(1);
   });
 });
