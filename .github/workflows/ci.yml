@@ -36,3 +36,17 @@ jobs:
         run: npm test
       - name: Build production bundle
         run: npm run build
+      - name: Build Docker image
+        run: docker build --tag ai-basics-glassbox:ci .
+      - name: Smoke-test Docker container and SPA fallback
+        run: |
+          docker run --detach --rm --name ai-basics-glassbox-ci --publish 8080:80 ai-basics-glassbox:ci
+          trap 'docker stop ai-basics-glassbox-ci >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 15); do
+            if curl --fail --silent http://127.0.0.1:8080/ >/tmp/glassbox-index.html; then
+              break
+            fi
+            sleep 1
+          done
+          grep -q '<div id="root"></div>' /tmp/glassbox-index.html
+          curl --fail --silent http://127.0.0.1:8080/lesson/example | grep -q '<div id="root"></div>'
