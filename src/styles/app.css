@@ -589,3 +589,59 @@ button:focus-visible {
 .score-bar[role="progressbar"] {
   position: relative;
 }
+
+
+/* Keyboard users can bypass the decorative introduction and jump to the workspace. */
+.skip-link {
+  position: absolute;
+  z-index: 10;
+  top: 8px;
+  left: 8px;
+  transform: translateY(calc(-100% - 12px));
+  border-radius: 6px;
+  padding: 10px 14px;
+  background: #17211c;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid #1f5b87;
+  outline-offset: 3px;
+}
+
+:where(a, button, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #1f5b87;
+  outline-offset: 3px;
+}
+
+@media (forced-colors: active) {
+  .control-panel,
+  .panel,
+  .pipeline-strip,
+  .chunk-card,
+  .answer-card,
+  .check-card {
+    border: 1px solid CanvasText;
+  }
+
+  .chunk-card.selected,
+  .grounded,
+  .ungrounded {
+    outline: 2px solid Highlight;
+  }
+
+  .primary-button,
+  .icon-button {
+    border: 1px solid ButtonText;
+  }
+
+  .score-bar {
+    border: 1px solid CanvasText;
+  }
+
+  .score-bar span {
+    background: Highlight;
+  }
+}

@@ -60,7 +60,9 @@ function App() {
   };
 
   return (
-    <main className="app-shell">
+    <>
+      <a className="skip-link" href="#workspace-main">Skip to interactive workspace</a>
+      <main className="app-shell" id="workspace-main" tabIndex={-1}>
       <section className="hero" aria-labelledby="page-title">
         <div>
           <p className="eyebrow">Build With AI: Basics</p>
@@ -154,7 +156,8 @@ function App() {
           <QualityPanel run={lastRun} />
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 
