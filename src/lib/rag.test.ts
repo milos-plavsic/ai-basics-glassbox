@@ -92,3 +92,32 @@ describe('RAG teaching pipeline', () => {
     expect(run.retrieval.map((result) => result.chunk.index)).toEqual([0, 1]);
   });
 });
+
+
+describe('deterministic retrieval evaluation fixtures', () => {
+  const fixtures = [
+    { name: 'refund window', source: 'Refunds are available within 30 days.', question: 'refunds 30 days', expected: 'Refunds are available' },
+    { name: 'guest access', source: 'Members may bring one guest.', question: 'members guest', expected: 'one guest' },
+    { name: 'lightning cancellation', source: 'Lightning cancels outdoor workshops.', question: 'lightning workshops', expected: 'Lightning cancels' },
+    { name: 'shipping refund', source: 'Shipping fees are refunded for damaged items.', question: 'shipping fees damaged', expected: 'Shipping fees' },
+    { name: 'gift card restriction', source: 'Gift cards cannot be refunded.', question: 'gift cards refunded', expected: 'Gift cards cannot' },
+    { name: 'cosine similarity', source: 'Cosine similarity compares vector direction.', question: 'cosine vector direction', expected: 'Cosine similarity' },
+    { name: 'embedding representation', source: 'Embeddings are lists of numbers.', question: 'embeddings numbers', expected: 'Embeddings are' },
+    { name: 'workshop registration', source: 'Weekend workshops require registration.', question: 'weekend workshops registration', expected: 'Weekend workshops' },
+    { name: 'refund processing', source: 'Approved refunds appear in five business days.', question: 'approved refunds days', expected: 'Approved refunds' },
+    { name: 'tool borrowing', source: 'Guests cannot borrow tools.', question: 'guests borrow tools', expected: 'Guests cannot' },
+    { name: 'shed hours', source: 'The tool shed is unlocked during staffed hours.', question: 'tool shed staffed hours', expected: 'tool shed' },
+    { name: 'bank delays', source: 'Bank delays can add two business days.', question: 'bank delays business days', expected: 'Bank delays' },
+    { name: 'final sale return', source: 'Final sale items cannot be returned.', question: 'final sale returned', expected: 'Final sale items' },
+    { name: 'chunking mechanics', source: 'Source text is split into chunks.', question: 'source text chunks', expected: 'Source text' },
+    { name: 'lexical baseline', source: 'The system uses a local lexical baseline.', question: 'local lexical baseline', expected: 'local lexical baseline' }
+  ];
+
+  it.each(fixtures)('retrieves and cites the expected evidence: $name', ({ source, question, expected }) => {
+    const run = runPipeline(source, question);
+    expect(run.selected).toHaveLength(1);
+    expect(run.selected[0].chunk.text).toContain(expected);
+    expect(run.groundedAnswer.body).toContain(expected);
+    expect(run.groundedAnswer.citations).toContain(run.selected[0].chunk.id);
+  });
+});
