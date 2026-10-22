@@ -28,9 +28,8 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --legacy-peer-deps
-      - name: Audit dependency vulnerabilities (diagnostic)
-        run: npm audit
-        continue-on-error: true
+      - name: Audit dependency vulnerabilities
+        run: npm audit --audit-level=moderate
       - name: Typecheck
         run: npm run typecheck
       - name: Run tests
