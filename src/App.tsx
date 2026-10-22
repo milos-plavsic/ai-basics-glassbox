@@ -170,11 +170,11 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PanelTitle({ icon, title }: { icon: ReactNode; title: string }) {
+function PanelTitle({ icon, title, titleId }: { icon: ReactNode; title: string; titleId?: string }) {
   return (
     <div className="panel-title">
       {icon}
-      <h2>{title}</h2>
+      <h2 id={titleId}>{title}</h2>
     </div>
   );
 }
@@ -206,7 +206,7 @@ function ChunkInspector({ run }: { run: PipelineRun }) {
 
   return (
     <section className="panel span-two" aria-labelledby="chunks-title">
-      <PanelTitle icon={<FileText aria-hidden="true" />} title="1. Chunking Inspector" />
+      <PanelTitle icon={<FileText aria-hidden="true" />} title="1. Chunking Inspector" titleId="chunks-title" />
       <p className="panel-copy">
         Every non-empty paragraph is preserved as a chunk. A short first paragraph is not silently
         treated as a title and dropped.
@@ -239,7 +239,7 @@ function ChunkInspector({ run }: { run: PipelineRun }) {
 function RetrievalPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel" aria-labelledby="retrieval-title">
-      <PanelTitle icon={<Search aria-hidden="true" />} title="2. Retrieval" />
+      <PanelTitle icon={<Search aria-hidden="true" />} title="2. Retrieval" titleId="retrieval-title" />
       <p className="panel-copy">
         Log-scaled word-frequency vectors and cosine similarity rank lexical overlap. These are
         not semantic embeddings.
@@ -306,7 +306,7 @@ function VectorPlot({ run }: { run: PipelineRun }) {
 function PromptPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel" aria-labelledby="prompt-title">
-      <PanelTitle icon={<Network aria-hidden="true" />} title="3. Prompt Assembly" />
+      <PanelTitle icon={<Network aria-hidden="true" />} title="3. Prompt Assembly" titleId="prompt-title" />
       <p className="panel-copy">
         This is a prompt preview for learning. No model receives it: the application runs locally
         and uses a deterministic extractive heuristic.
@@ -326,7 +326,7 @@ function PromptPanel({ run }: { run: PipelineRun }) {
 function AnswerPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel span-two" aria-labelledby="answers-title">
-      <PanelTitle icon={<CheckCircle2 aria-hidden="true" />} title="4. Answer Comparison" />
+      <PanelTitle icon={<CheckCircle2 aria-hidden="true" />} title="4. Answer Comparison" titleId="answers-title" />
       <p className="panel-copy">
         The first card extracts sentences with overlapping query terms; it does not generate or
         verify a semantic answer. The second card is a placeholder illustration, not an LLM output.
@@ -356,7 +356,7 @@ function AnswerPanel({ run }: { run: PipelineRun }) {
 function QualityPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel span-two" aria-labelledby="quality-title">
-      <PanelTitle icon={<ShieldCheck aria-hidden="true" />} title="5. Evidence & Quality Checks" />
+      <PanelTitle icon={<ShieldCheck aria-hidden="true" />} title="5. Evidence & Quality Checks" titleId="quality-title" />
       <p className="panel-copy">
         These are transparent lexical proxies, not calibrated confidence or hallucination
         probabilities. A citation identifies a source chunk but does not prove that it supports a claim.
