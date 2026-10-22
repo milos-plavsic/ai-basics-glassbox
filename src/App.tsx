@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   BrainCircuit,
@@ -21,30 +21,42 @@ function App() {
   const scenario = getScenario(scenarioId);
   const [source, setSource] = useState(scenario.source);
   const [question, setQuestion] = useState(scenario.question);
-  const [lastRun, setLastRun] = useState<PipelineRun>(() => runPipeline(scenario.source, scenario.question));
+  const [topK, setTopK] = useState(3);
+  const [lastSource, setLastSource] = useState(scenario.source);
+  const [lastQuestion, setLastQuestion] = useState(scenario.question);
+  const [lastTopK, setLastTopK] = useState(3);
+  const [lastRun, setLastRun] = useState<PipelineRun>(() =>
+    runPipeline(scenario.source, scenario.question, 3)
+  );
 
-  const previewRun = useMemo(() => runPipeline(source, question), [source, question]);
-  const hasQuestion = question.trim().length > 0;
-  const canRun = hasQuestion && source.trim().length > 0;
+  const canRun = source.trim().length > 0 && question.trim().length > 0;
+  const hasUnrunChanges = source !== lastSource || question !== lastQuestion || topK !== lastTopK;
+
+  const execute = (nextSource: string, nextQuestion: string, nextTopK: number) => {
+    setLastRun(runPipeline(nextSource, nextQuestion, nextTopK));
+    setLastSource(nextSource);
+    setLastQuestion(nextQuestion);
+    setLastTopK(nextTopK);
+  };
 
   const handleScenarioChange = (id: string) => {
     const next = getScenario(id);
     setScenarioId(id);
     setSource(next.source);
     setQuestion(next.question);
-    setLastRun(runPipeline(next.source, next.question));
+    setTopK(3);
+    execute(next.source, next.question, 3);
   };
 
   const handleReset = () => {
     setSource(scenario.source);
     setQuestion(scenario.question);
-    setLastRun(runPipeline(scenario.source, scenario.question));
+    setTopK(3);
+    execute(scenario.source, scenario.question, 3);
   };
 
   const handleRun = () => {
-    if (canRun) {
-      setLastRun(runPipeline(source, question));
-    }
+    if (canRun) execute(source, question, topK);
   };
 
   return (
@@ -54,14 +66,14 @@ function App() {
           <p className="eyebrow">Build With AI: Basics</p>
           <h1 id="page-title">AI Basics Glassbox</h1>
           <p className="hero-copy">
-            Ask one question, then inspect the RAG pipeline that turns source text into chunks,
-            retrieval scores, prompt context, and a cited answer.
+            Explore a deterministic, local RAG teaching simulation. Inspect source chunks,
+            lexical retrieval, prompt assembly, extractive candidates, and evidence limitations.
           </p>
         </div>
-        <div className="hero-metrics" aria-label="Pipeline summary">
+        <div className="hero-metrics" aria-label="Last executed pipeline summary">
           <Metric label="Chunks" value={String(lastRun.chunks.length)} />
-          <Metric label="Top score" value={formatPercent(lastRun.retrieval[0]?.score ?? 0)} />
-          <Metric label="Citations" value={String(lastRun.groundedAnswer.citations.length)} />
+          <Metric label="Top lexical similarity" value={formatPercent(lastRun.selected[0]?.score ?? 0)} />
+          <Metric label="Citation references" value={String(lastRun.groundedAnswer.citations.length)} />
         </div>
       </section>
 
@@ -100,6 +112,19 @@ function App() {
             />
           </label>
 
+          <label className="field">
+            <span>Chunks to retrieve (top-k)</span>
+            <select value={topK} onChange={(event) => setTopK(Number(event.target.value))}>
+              <option value={1}>1 chunk</option>
+              <option value={3}>3 chunks</option>
+              <option value={5}>5 chunks</option>
+            </select>
+          </label>
+          <p className="field-help">
+            Only chunks with a positive lexical score of at least 8% are selected. This fixed
+            teaching threshold is not a confidence probability.
+          </p>
+
           <div className="button-row">
             <button type="button" className="primary-button" onClick={handleRun} disabled={!canRun}>
               <Play size={18} aria-hidden="true" />
@@ -111,11 +136,18 @@ function App() {
           </div>
 
           {!canRun && <p className="warning-text">Add source text and a question to run the pipeline.</p>}
+          {hasUnrunChanges ? (
+            <p className="run-status changed" role="status">
+              Inputs changed — results still show the last run. Select Run to update every panel.
+            </p>
+          ) : (
+            <p className="run-status" role="status">Results match the current inputs.</p>
+          )}
         </aside>
 
         <div className="pipeline-grid">
           <PipelineStrip />
-          <ChunkInspector run={previewRun} executedRun={lastRun} />
+          <ChunkInspector run={lastRun} />
           <RetrievalPanel run={lastRun} />
           <PromptPanel run={lastRun} />
           <AnswerPanel run={lastRun} />
@@ -149,8 +181,8 @@ function PipelineStrip() {
     ['Chunk', FileText],
     ['Retrieve', Search],
     ['Assemble', Network],
-    ['Answer', CheckCircle2],
-    ['Check', ShieldCheck]
+    ['Extract', CheckCircle2],
+    ['Inspect', ShieldCheck]
   ] as const;
 
   return (
@@ -166,28 +198,32 @@ function PipelineStrip() {
   );
 }
 
-function ChunkInspector({ run, executedRun }: { run: PipelineRun; executedRun: PipelineRun }) {
-  const selectedIds = new Set(executedRun.selected.map((result) => result.chunk.id));
+function ChunkInspector({ run }: { run: PipelineRun }) {
+  const selectedIds = new Set(run.selected.map((result) => result.chunk.id));
 
   return (
     <section className="panel span-two" aria-labelledby="chunks-title">
       <PanelTitle icon={<FileText aria-hidden="true" />} title="1. Chunking Inspector" />
-      <p className="panel-copy">The source document is split into small retrievable pieces before search starts.</p>
+      <p className="panel-copy">
+        Every non-empty paragraph is preserved as a chunk. A short first paragraph is not silently
+        treated as a title and dropped.
+      </p>
       <div className="chunk-list">
         {run.chunks.length === 0 ? (
-          <p className="empty-state">No chunks yet. Add a source document with at least one paragraph.</p>
+          <p className="empty-state">No chunks. Add a source document with at least one non-empty paragraph, then Run.</p>
         ) : (
           run.chunks.map((chunk) => (
             <article className={`chunk-card ${selectedIds.has(chunk.id) ? 'selected' : ''}`} key={chunk.id}>
               <div className="chunk-meta">
                 <span>{chunk.id}</span>
-                <span>{chunk.tokenEstimate} tokens</span>
+                <span>{chunk.tokenEstimate} estimated tokens</span>
+                {selectedIds.has(chunk.id) && <span className="selected-label">Retrieved</span>}
               </div>
               <p>{chunk.text}</p>
               <div className="term-row" aria-label={`Top terms for ${chunk.id}`}>
-                {chunk.topTerms.map((term) => (
+                {chunk.topTerms.length > 0 ? chunk.topTerms.map((term) => (
                   <span key={term}>{term}</span>
-                ))}
+                )) : <span>No indexable terms</span>}
               </div>
             </article>
           ))
@@ -201,21 +237,39 @@ function RetrievalPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel" aria-labelledby="retrieval-title">
       <PanelTitle icon={<Search aria-hidden="true" />} title="2. Retrieval" />
-      <p className="panel-copy">Cosine similarity ranks which chunks look closest to the question.</p>
-      <div className="score-list">
-        {run.retrieval.map((result) => (
-          <div key={result.chunk.id} className="score-row">
-            <div>
-              <strong>{result.chunk.id}</strong>
-              <span>{result.selected ? 'selected for prompt' : 'not selected'}</span>
+      <p className="panel-copy">
+        Log-scaled word-frequency vectors and cosine similarity rank lexical overlap. These are
+        not semantic embeddings.
+      </p>
+      {run.retrieval.length === 0 ? (
+        <p className="empty-state">No source chunks are available to rank.</p>
+      ) : (
+        <div className="score-list">
+          {run.retrieval.map((result) => (
+            <div key={result.chunk.id} className="score-row">
+              <div>
+                <strong>{result.chunk.id}</strong>
+                <span>{result.selected ? 'selected for context' : 'not selected'}</span>
+              </div>
+              <div
+                className="score-bar"
+                role="progressbar"
+                aria-label={`${result.chunk.id} lexical similarity`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(result.score * 100)}
+              >
+                <span style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }} />
+              </div>
+              <b>{formatPercent(result.score)}</b>
             </div>
-            <div className="score-bar" aria-label={`${result.chunk.id} score ${formatPercent(result.score)}`}>
-              <span style={{ width: `${Math.max(3, result.score * 100)}%` }} />
-            </div>
-            <b>{formatPercent(result.score)}</b>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+      <p className="plot-note">
+        Illustrative chunk map — coordinates are deterministic visual aids, not a semantic embedding
+        or a meaningful distance scale.
+      </p>
       <VectorPlot run={run} />
     </section>
   );
@@ -223,7 +277,7 @@ function RetrievalPanel({ run }: { run: PipelineRun }) {
 
 function VectorPlot({ run }: { run: PipelineRun }) {
   return (
-    <svg className="vector-plot" viewBox="0 0 100 100" role="img" aria-label="2D similarity plot">
+    <svg className="vector-plot" viewBox="0 0 100 100" role="img" aria-label="Illustrative chunk map, not a semantic embedding">
       <rect x="0" y="0" width="100" height="100" rx="4" />
       <line x1="12" y1="82" x2="88" y2="82" />
       <line x1="12" y1="82" x2="12" y2="14" />
@@ -237,7 +291,7 @@ function VectorPlot({ run }: { run: PipelineRun }) {
             cy={result.point.y}
             r={result.selected ? 4 : 3}
           />
-          <text x={result.point.x + 4} y={result.point.y + 1}>
+          <text x={Math.min(result.point.x + 4, 93)} y={result.point.y + 1}>
             {result.chunk.id}
           </text>
         </g>
@@ -250,9 +304,12 @@ function PromptPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel" aria-labelledby="prompt-title">
       <PanelTitle icon={<Network aria-hidden="true" />} title="3. Prompt Assembly" />
-      <p className="panel-copy">The answer sees only the instruction, retrieved context, and question.</p>
+      <p className="panel-copy">
+        This is a prompt preview for learning. No model receives it: the application runs locally
+        and uses a deterministic extractive heuristic.
+      </p>
       <div className="prompt-box">
-        <h3>System</h3>
+        <h3>Instruction (simulated)</h3>
         <p>{run.prompt.system}</p>
         <h3>Retrieved context</h3>
         <pre>{run.prompt.context}</pre>
@@ -267,14 +324,17 @@ function AnswerPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel span-two" aria-labelledby="answers-title">
       <PanelTitle icon={<CheckCircle2 aria-hidden="true" />} title="4. Answer Comparison" />
-      <p className="panel-copy">Compare a cited answer with a baseline that has no evidence trail.</p>
+      <p className="panel-copy">
+        The first card extracts sentences with overlapping query terms; it does not generate or
+        verify a semantic answer. The second card is a placeholder illustration, not an LLM output.
+      </p>
       <div className="answer-grid">
         <article className="answer-card grounded">
           <h3>{run.groundedAnswer.title}</h3>
           <p>{run.groundedAnswer.body}</p>
-          <div className="citation-row">
+          <div className="citation-row" aria-label="Source chunk references">
             {run.groundedAnswer.citations.length === 0 ? (
-              <span>No citations</span>
+              <span>No source references</span>
             ) : (
               run.groundedAnswer.citations.map((citation) => <span key={citation}>{citation}</span>)
             )}
@@ -283,9 +343,7 @@ function AnswerPanel({ run }: { run: PipelineRun }) {
         <article className="answer-card ungrounded">
           <h3>{run.ungroundedAnswer.title}</h3>
           <p>{run.ungroundedAnswer.body}</p>
-          <div className="citation-row">
-            <span>No evidence trail</span>
-          </div>
+          <div className="citation-row"><span>No evidence trail</span></div>
         </article>
       </div>
     </section>
@@ -295,8 +353,11 @@ function AnswerPanel({ run }: { run: PipelineRun }) {
 function QualityPanel({ run }: { run: PipelineRun }) {
   return (
     <section className="panel span-two" aria-labelledby="quality-title">
-      <PanelTitle icon={<ShieldCheck aria-hidden="true" />} title="5. Quality Checks" />
-      <p className="panel-copy">Simple checks show whether the answer is supported enough to trust.</p>
+      <PanelTitle icon={<ShieldCheck aria-hidden="true" />} title="5. Evidence & Quality Checks" />
+      <p className="panel-copy">
+        These are transparent lexical proxies, not calibrated confidence or hallucination
+        probabilities. A citation identifies a source chunk but does not prove that it supports a claim.
+      </p>
       <div className="check-grid">
         {run.checks.map((check) => (
           <article className={`check-card ${check.tone}`} key={check.label}>
