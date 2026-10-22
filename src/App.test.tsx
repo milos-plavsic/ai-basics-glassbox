@@ -50,7 +50,7 @@ describe('App', () => {
     await user.type(screen.getByLabelText(/question/i), 'A changed question');
     expect(screen.getByRole('status')).toHaveTextContent(/inputs changed/i);
     await user.click(screen.getByRole('button', { name: /reset scenario/i }));
-    expect(screen.getByLabelText(/question/i)).toHaveValue(/How does the refund policy work for a damaged order\?/i);
+    expect(screen.getByLabelText(/question/i)).toHaveValue('How does the refund policy work for a damaged order?');
     expect(screen.getByRole('status')).toHaveTextContent(/results match the current inputs/i);
   });
 
