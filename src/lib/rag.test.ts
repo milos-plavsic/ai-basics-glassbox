@@ -43,7 +43,7 @@ describe('RAG teaching pipeline', () => {
   it('computes cosine similarity safely for zero and mismatched vectors', () => {
     expect(cosineSimilarity([1, 0], [1, 0])).toBe(1);
     expect(cosineSimilarity([0, 0], [1, 0])).toBe(0);
-    expect(cosineSimilarity([1], [1, 1])).toBe(1);
+    expect(cosineSimilarity([1], [1, 1])).toBeCloseTo(1 / Math.sqrt(2), 10);
   });
 
   it('retrieves source evidence and cites the chunk containing the sentence', () => {
