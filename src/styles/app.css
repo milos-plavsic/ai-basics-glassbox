@@ -549,3 +549,42 @@ button:focus-visible {
     grid-template-columns: 58px 1fr 40px;
   }
 }
+
+
+.field-help {
+  margin: -6px 0 14px;
+  color: #58645d;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.run-status {
+  margin: 10px 0 0;
+  color: #40594a;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.run-status.changed {
+  border-left: 3px solid #95531c;
+  padding-left: 9px;
+  color: #79400f;
+  font-weight: 750;
+}
+
+.selected-label {
+  color: #236d51;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.plot-note {
+  margin: 16px 0 0;
+  color: #58645d;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.score-bar[role="progressbar"] {
+  position: relative;
+}
