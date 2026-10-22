@@ -27,7 +27,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: Audit dependency vulnerabilities (diagnostic)
         run: npm audit
         continue-on-error: true
