@@ -13,6 +13,15 @@ describe('App', () => {
     expect(screen.getByText(/not calibrated confidence/i)).toBeInTheDocument();
   });
 
+  it('gives each results section an accessible name from its heading', () => {
+    render(<App />);
+    expect(screen.getByRole('region', { name: /1\. chunking inspector/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /2\. retrieval/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /3\. prompt assembly/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /4\. answer comparison/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /5\. evidence & quality checks/i })).toBeInTheDocument();
+  });
+
   it('provides a skip link to the interactive workspace', () => {
     render(<App />);
     expect(screen.getByRole('link', { name: /skip to interactive workspace/i })).toHaveAttribute(
