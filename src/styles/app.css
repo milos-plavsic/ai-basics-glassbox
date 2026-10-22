@@ -204,7 +204,7 @@ textarea {
 select:focus,
 textarea:focus,
 button:focus-visible {
-  outline: 3px solid rgba(31, 91, 135, 0.28);
+  outline: 3px solid #1f5b87;
   outline-offset: 2px;
 }
 
