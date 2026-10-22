@@ -28,6 +28,9 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Audit dependency vulnerabilities
+        run: npm audit
+        continue-on-error: true
       - name: Typecheck
         run: npm run typecheck
       - name: Run tests
