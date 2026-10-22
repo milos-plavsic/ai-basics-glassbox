@@ -366,6 +366,7 @@ button:focus-visible {
 }
 
 .score-bar span {
+  display: block;
   height: 100%;
   background: linear-gradient(90deg, #2d7555, #1f5b87);
 }
