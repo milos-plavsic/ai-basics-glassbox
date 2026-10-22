@@ -13,6 +13,15 @@ describe('App', () => {
     expect(screen.getByText(/not calibrated confidence/i)).toBeInTheDocument();
   });
 
+  it('provides a skip link to the interactive workspace', () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: /skip to interactive workspace/i })).toHaveAttribute(
+      'href',
+      '#workspace-main'
+    );
+    expect(document.getElementById('workspace-main')).toBeInTheDocument();
+  });
+
   it('marks results stale after an edit and refreshes every panel after Run', async () => {
     const user = userEvent.setup();
     render(<App />);
